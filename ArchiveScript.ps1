@@ -4,9 +4,9 @@
 # Created: 2014-01-21
 # Modified: 2014-10-30
 # Script: Recursive Folder Backup
-# Version: 1.0
+# Version: 2.0
 # Description: A quick PowerShell script for the backup of an entire directory, to another directory
-# 
+#
 
 # 
 # DEFINE ALL NECESSARY VARIABLES
@@ -16,6 +16,9 @@
 $Date = Get-Date
 # Timespan used for ShowOldFiles
 $Timespan = new-timespan -days 30
+# Define service(s) to be stopped
+# NOTE: Must be the "Service Name", not the "Display Name" of the service
+$Service_1 = ""
 # Original file location
 $OrigPath = ""
 # Backup folder location
@@ -24,7 +27,7 @@ $BackupPath = ""
 $BackupDir = "{0}-{1:d2}-{2:d2}" -f $date.year, $date.month, $date.day
 # Log folder location
 $BackupErrorLogDir = "$BackupPath\logs"
-# Define today's log filename
+# Define today's log file
 $BackupErrorLogFile = "{0}-{1:d2}-{2:d2}.log" -f $date.year, $date.month, $date.day
 
 # 
@@ -76,6 +79,8 @@ function RemoveOldFiles($Path, $Timespan)
 # BEGIN BACKUP PROCESS
 # 
 
+# Stop the associated service
+Stop-Service $Service_1 -WhatIf
 # Create today's backup folder
 New-Item $BackupPath\$BackupDir -type directory -Force -WhatIf
 # Copy all files from the original location
@@ -85,6 +90,8 @@ Copy-Item $OrigPath\* $BackupPath\$BackupDir -Force -WhatIf
 # BEGIN CLEAN UP PROCESS
 # 
 
+# Start the associated service
+Start-Service $Service_1 -WhatIf
 # Checks backup files 
 RemoveOldFiles $BackupPath $Timespan
 # Stops logging process
